@@ -98,10 +98,10 @@ function createEnemy(type) {
   type = type || "basic";
   var y = 20 + Math.random() * (H - 40);
   switch (type) {
-    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.3, hp: 1, type: "basic", score: 100, fireRate: 18, fireTimer: 10 + Math.random() * 50 };
-    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: -2.6 - Math.random() * 0.5, hp: 1, type: "fast", score: 150, fireRate: 60, fireTimer: 20 + Math.random() * 40 };
-    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.7, hp: 3, type: "tank", score: 300, fireRate: 12, fireTimer: 5 + Math.random() * 35 };
-    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -0.9, hp: 2, type: "sniper", score: 250, fireRate: 15, fireTimer: 3 + Math.random() * 35 };
+    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.3, hp: 1, type: "basic", score: 100, fireRate: 10, fireTimer: 5 + Math.random() * 50 };
+    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: -2.6 - Math.random() * 0.5, hp: 1, type: "fast", score: 150, fireRate: 35, fireTimer: 10 + Math.random() * 30 };
+    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.7, hp: 3, type: "tank", score: 300, fireRate: 7, fireTimer: 3 + Math.random() * 35 };
+    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -0.9, hp: 2, type: "sniper", score: 250, fireRate: 8, fireTimer: 2 + Math.random() * 35 };
   }
 }
 function createAsteroid() {
@@ -156,14 +156,58 @@ function updateUI() {
 }
 
 function drawPixelShip(x, y, w, h, color, accent) {
-  ctx.fillStyle = color;
-  ctx.fillRect(x - w / 2 + 2, y - 2, w - 4, h - 6);
-  ctx.fillRect(x - 1, y - h / 2 - 2, 3, 5);
-  ctx.fillStyle = accent;
-  ctx.fillRect(x - 1, y - 3, 3, 3);
-  ctx.fillStyle = "#ff6600";
-  ctx.fillRect(x - 2, y + h / 2 - 3, 2, 3);
-  ctx.fillRect(x + 1, y + h / 2 - 3, 2, 3);
+  var cx = Math.floor(x), cy = Math.floor(y);
+
+  // Engine glow (flicker)
+  if (Math.random() > 0.3) {
+    ctx.fillStyle = "#ff6600";
+    ctx.fillRect(cx - 1, cy + 5, 2, 3);
+    ctx.fillStyle = "#ffaa00";
+    ctx.fillRect(cx, cy + 6, 1, 2);
+  }
+
+  // Main body
+  ctx.fillStyle = "#558866";
+  ctx.fillRect(cx - 4, cy - 1, 8, 5);
+  ctx.fillStyle = "#44aa66";
+  ctx.fillRect(cx - 3, cy - 2, 6, 2);
+
+  // Cockpit
+  ctx.fillStyle = "#88ffcc";
+  ctx.fillRect(cx - 1, cy - 3, 2, 2);
+  ctx.fillRect(cx, cy - 4, 1, 2);
+
+  // Nose
+  ctx.fillStyle = "#66cc88";
+  ctx.fillRect(cx, cy - 5, 1, 2);
+  ctx.fillRect(cx + 1, cy - 4, 1, 1);
+
+  // Wings - top
+  ctx.fillStyle = "#338855";
+  ctx.fillRect(cx - 6, cy - 2, 2, 3);
+  ctx.fillRect(cx - 7, cy - 3, 2, 2);
+  ctx.fillStyle = "#44aa66";
+  ctx.fillRect(cx - 7, cy, 1, 1);
+
+  // Wings - bottom
+  ctx.fillStyle = "#338855";
+  ctx.fillRect(cx + 4, cy - 2, 2, 3);
+  ctx.fillRect(cx + 5, cy - 3, 2, 2);
+  ctx.fillStyle = "#44aa66";
+  ctx.fillRect(cx + 6, cy, 1, 1);
+
+  // Wing tips
+  ctx.fillStyle = "#66dd88";
+  ctx.fillRect(cx - 8, cy - 3, 1, 1);
+  ctx.fillRect(cx + 7, cy - 3, 1, 1);
+
+  // Tail fins
+  ctx.fillStyle = "#338855";
+  ctx.fillRect(cx - 3, cy + 3, 1, 2);
+  ctx.fillRect(cx + 2, cy + 3, 1, 2);
+  ctx.fillStyle = "#66cc88";
+  ctx.fillRect(cx - 4, cy + 4, 1, 1);
+  ctx.fillRect(cx + 3, cy + 4, 1, 1);
 }
 function drawEnemyBasic(x, y) {
   ctx.fillStyle = "#ff4444"; ctx.fillRect(x - 6, y - 5, 12, 10); ctx.fillRect(x - 3, y - 7, 6, 4);
@@ -485,6 +529,51 @@ function gameOver() {
   highScoreDisplay.textContent = "HIGH " + highScore;
   gameOverScreen.style.display = "flex"; updateUI();
 }
+
+
+// ── Leaderboard ──
+function saveScore(s) {
+  var today = new Date().toISOString().slice(0, 10);
+  var data = JSON.parse(localStorage.getItem("pxsh_lb") || "[]");
+  data.push({ score: s, date: today, time: new Date().toISOString() });
+  data.sort(function(a, b) { return b.score - a.score; });
+  data = data.slice(0, 100);
+  localStorage.setItem("pxsh_lb", JSON.stringify(data));
+  renderLB();
+}
+
+function renderLB() {
+  var today = new Date().toISOString().slice(0, 10);
+  var data = JSON.parse(localStorage.getItem("pxsh_lb") || "[]");
+  var todayList = data.filter(function(d) { return d.date === today; }).slice(0, 10);
+  var list = document.getElementById("lb-list");
+  if (!list) return;
+  list.innerHTML = "";
+  if (todayList.length === 0) {
+    list.innerHTML = '<div class="lb-empty">今天还没有记录</div>';
+    return;
+  }
+  for (var i = 0; i < todayList.length; i++) {
+    var item = todayList[i];
+    var rank = (i === 0) ? "1ST" : (i === 1) ? "2ND" : (i === 2) ? "3RD" : (i + 1);
+    var medal = (i === 0) ? "🥇" : (i === 1) ? "🥈" : (i === 2) ? "🥉" : "";
+    list.innerHTML += '<div class="lb-row"><span class="lb-rank">' + medal + ' ' + rank + '</span><span class="lb-score">' + item.score + '</span></div>';
+  }
+}
+
+function toggleLB() {
+  var panel = document.getElementById("lb-panel");
+  if (!panel) return;
+  if (panel.style.display === "flex") { panel.style.display = "none"; }
+  else { renderLB(); panel.style.display = "flex"; }
+}
+
+// Save score on game over
+var origGameOver = gameOver;
+gameOver = function() {
+  saveScore(score);
+  origGameOver();
+};
 
 function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
 
