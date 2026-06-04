@@ -340,7 +340,7 @@ function update() {
   if (comboTimer > 0) { comboTimer--; if (comboTimer <= 0) comboCount = 0; }
 
   spawnTimer++;
-  var spawnInterval = Math.max(25, 75 - difficulty * 3);
+  var spawnInterval = Math.max(18, 60 - difficulty * 3);
   if (spawnTimer >= spawnInterval) {
     spawnTimer = 0;
     var r = Math.random();
@@ -351,7 +351,7 @@ function update() {
   }
 
   asteroidTimer++;
-  if (asteroidTimer >= Math.max(60, 150 - difficulty * 4)) {
+  if (asteroidTimer >= Math.max(40, 120 - difficulty * 4)) {
     asteroidTimer = 0; asteroids.push(createAsteroid());
   }
 
@@ -588,5 +588,6 @@ score = 0; lives = 3;
 highScoreDisplay.textContent = "HIGH " + highScore;
 updateUI();
 gameLoop();
+
 
 
