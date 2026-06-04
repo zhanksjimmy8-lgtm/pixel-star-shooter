@@ -55,7 +55,16 @@ canvas.addEventListener("pointerdown", function(e) {
   if (state === STATE.MENU) startGame();
   if (state === STATE.GAMEOVER) { gameOverScreen.style.display = "flex"; restartGame(); }
 });
-canvas.addEventListener("pointerup", function() { mouseDown = false; });
+canvas.addEventListener("pointerup", function(e) { mouseDown = false; touchActive = false; try { canvas.releasePointerCapture(e.pointerId); } catch(ex) {} });
+canvas.addEventListener("pointercancel", function(e) { mouseDown = false; touchActive = false; });
+canvas.addEventListener("pointermove", function(e) {
+  e.preventDefault();
+  if (touchActive) {
+    var rect = canvas.getBoundingClientRect();
+    touchTargetX = (e.clientX - rect.left) / rect.width * W;
+    touchTargetY = (e.clientY - rect.top) / rect.height * H;
+  }
+});
 
 document.getElementById("btn-up").addEventListener("pointerdown", function(e) { e.preventDefault(); keys["ArrowUp"] = true; });
 document.getElementById("btn-up").addEventListener("pointerup", function() { keys["ArrowUp"] = false; });
