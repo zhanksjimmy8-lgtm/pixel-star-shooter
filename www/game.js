@@ -51,7 +51,7 @@ window.addEventListener("keydown", function(e) {
 });
 window.addEventListener("keyup", function(e) { keys[e.key] = false; });
 canvas.addEventListener("pointerdown", function(e) {
-  e.preventDefault(); initAudio(); mouseDown = true;
+  e.preventDefault(); initAudio(); mouseDown = true; touchActive = true;
   if (state === STATE.MENU) startGame();
   if (state === STATE.GAMEOVER) { gameOverScreen.style.display = "flex"; restartGame(); }
 });
@@ -73,7 +73,7 @@ document.getElementById("restart-btn").addEventListener("click", function() { re
 let player, bullets, enemyBullets, enemies, asteroids, powerUps, particles, stars;
 
 function createPlayer() {
-  return { x: 40, y: H / 2, w: 16, h: 14, dx: 0, dy: 0, speed: 1.2,
+  return { x: 40, y: H / 2, w: 16, h: 14, dx: 0, dy: 0, speed: 1.8,
     fireTimer: 0, fireRate: 12, weaponLevel: 1, shieldTimer: 0, invincible: 0, flashTimer: 0 };
 }
 function createBullet(x, y, dy) {
@@ -87,15 +87,15 @@ function createEnemy(type) {
   type = type || "basic";
   var y = 20 + Math.random() * (H - 40);
   switch (type) {
-    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.0, hp: 1, type: "basic", score: 100, fireRate: 120, fireTimer: 40 + Math.random() * 60 };
-    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: -2.2 - Math.random() * 0.5, hp: 1, type: "fast", score: 150, fireRate: 0, fireTimer: 0 };
-    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.5, hp: 3, type: "tank", score: 300, fireRate: 80, fireTimer: 20 + Math.random() * 40 };
-    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -0.7, hp: 2, type: "sniper", score: 250, fireRate: 90, fireTimer: 10 + Math.random() * 40 };
+    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.3, hp: 1, type: "basic", score: 100, fireRate: 60, fireTimer: 30 + Math.random() * 50 };
+    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: -2.6 - Math.random() * 0.5, hp: 1, type: "fast", score: 150, fireRate: 0, fireTimer: 0 };
+    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.7, hp: 3, type: "tank", score: 300, fireRate: 45, fireTimer: 15 + Math.random() * 35 };
+    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -0.9, hp: 2, type: "sniper", score: 250, fireRate: 55, fireTimer: 8 + Math.random() * 35 };
   }
 }
 function createAsteroid() {
   var size = 10 + Math.random() * 16;
-  return { x: W + size, y: Math.random() * H, w: size, h: size, dx: -(0.8 + Math.random() * 1.5),
+  return { x: W + size, y: Math.random() * H, w: size, h: size, dx: -(1.0 + Math.random() * 1.8),
     dy: (Math.random() - 0.5) * 0.8, hp: Math.ceil(size / 8), alive: true,
     rot: Math.random() * Math.PI * 2, rotSpeed: (Math.random() - 0.5) * 0.08 };
 }
@@ -213,11 +213,18 @@ function update() {
   difficulty = 1 + Math.floor(frameCount / 4200);
   screenShake *= 0.85;
 
-  player.dx = 0; player.dy = 0;
-  if (keys["ArrowLeft"] || keys["a"]) player.dx = -1;
-  if (keys["ArrowRight"] || keys["d"]) player.dx = 1;
-  if (keys["ArrowUp"] || keys["w"]) player.dy = -1;
-  if (keys["ArrowDown"] || keys["s"]) player.dy = 1;
+  if (touchActive) {
+    var dx = touchTargetX - player.x, dy = touchTargetY - player.y;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 3) { player.dx = dx / dist; player.dy = dy / dist; }
+    else { player.dx = 0; player.dy = 0; }
+  } else {
+    player.dx = 0; player.dy = 0;
+    if (keys["ArrowLeft"] || keys["a"]) player.dx = -1;
+    if (keys["ArrowRight"] || keys["d"]) player.dx = 1;
+    if (keys["ArrowUp"] || keys["w"]) player.dy = -1;
+    if (keys["ArrowDown"] || keys["s"]) player.dy = 1;
+  }
   if (player.dx !== 0 && player.dy !== 0) { player.dx *= 0.7; player.dy *= 0.7; }
   player.x += player.dx * player.speed;
   player.y += player.dy * player.speed;
@@ -280,7 +287,7 @@ function update() {
   if (comboTimer > 0) { comboTimer--; if (comboTimer <= 0) comboCount = 0; }
 
   spawnTimer++;
-  var spawnInterval = Math.max(35, 100 - difficulty * 3);
+  var spawnInterval = Math.max(25, 75 - difficulty * 3);
   if (spawnTimer >= spawnInterval) {
     spawnTimer = 0;
     var r = Math.random();
