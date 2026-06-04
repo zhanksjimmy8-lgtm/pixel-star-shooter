@@ -92,21 +92,23 @@ function createBullet(x, y, dy) {
   return { x: x, y: y, w: 5, h: 3, dx: 6, dy: dy };
 }
 function createEnemyBullet(x, y) {
-  return { x: x, y: y, w: 3, h: 3, dx: -5, dy: 0 };
+  return { x: x, y: y, w: 3, h: 3, dx: -5 - difficulty, dy: 0 };
 }
 function createEnemy(type) {
+  var speedMul = 1 + (difficulty - 1) * 0.2;
   type = type || "basic";
   var y = 20 + Math.random() * (H - 40);
   switch (type) {
-    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.6, hp: 1, type: "basic", score: 100, fireRate: 10, fireTimer: 5 + Math.random() * 50 };
-    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: -3.2 - Math.random() * 0.5, hp: 1, type: "fast", score: 150, fireRate: 35, fireTimer: 10 + Math.random() * 30 };
-    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.9, hp: 3, type: "tank", score: 300, fireRate: 7, fireTimer: 3 + Math.random() * 35 };
-    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -1.1, hp: 2, type: "sniper", score: 250, fireRate: 8, fireTimer: 2 + Math.random() * 35 };
+    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -2.5 * speedMul, hp: 1, type: "basic", score: 100, fireRate: 10, fireTimer: 5 + Math.random() * 50 };
+    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: (-4.5 - Math.random() * 0.8) * speedMul, hp: 1, type: "fast", score: 150, fireRate: 35, fireTimer: 10 + Math.random() * 30 };
+    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -1.4 * speedMul, hp: 3, type: "tank", score: 300, fireRate: 7, fireTimer: 3 + Math.random() * 35 };
+    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -1.6 * speedMul, hp: 2, type: "sniper", score: 250, fireRate: 8, fireTimer: 2 + Math.random() * 35 };
   }
 }
 function createAsteroid() {
+  var speedMul = 1 + (difficulty - 1) * 0.2;
   var size = 10 + Math.random() * 16;
-  return { x: W + size, y: Math.random() * H, w: size, h: size, dx: -(1.3 + Math.random() * 2.2),
+  return { x: W + size, y: Math.random() * H, w: size, h: size, dx: -(2.0 + Math.random() * 3.0) * speedMul,
     dy: (Math.random() - 0.5) * 0.8, hp: Math.ceil(size / 8), alive: true,
     rot: Math.random() * Math.PI * 2, rotSpeed: (Math.random() - 0.5) * 0.08 };
 }
@@ -253,7 +255,7 @@ function rectsCollide(a, b) {
 function update() {
   if (state !== STATE.PLAYING) return;
   frameCount++;
-  difficulty = 1 + Math.floor(frameCount / 2400);
+  difficulty = 1 + Math.floor(frameCount / 1500);
   screenShake *= 0.85;
 
   player.dx = 0; player.dy = 0;
@@ -328,9 +330,10 @@ function update() {
   if (comboTimer > 0) { comboTimer--; if (comboTimer <= 0) comboCount = 0; }
 
   spawnTimer++;
-  var spawnInterval = Math.max(8, 35 - difficulty * 3);
+  var spawnInterval = Math.max(5, 28 - difficulty * 3);
   if (spawnTimer >= spawnInterval) {
     spawnTimer = 0;
+    if (difficulty >= 5 && Math.random() < 0.3) { enemies.push(createEnemy("basic")); }
     var r = Math.random();
     if (r < 0.5) enemies.push(createEnemy("basic"));
     else if (r < 0.75) enemies.push(createEnemy("fast"));
@@ -339,7 +342,7 @@ function update() {
   }
 
   asteroidTimer++;
-  if (asteroidTimer >= Math.max(10, 45 - difficulty * 4)) {
+  if (asteroidTimer >= Math.max(6, 35 - difficulty * 4)) {
     asteroidTimer = 0; asteroids.push(createAsteroid());
   }
 
