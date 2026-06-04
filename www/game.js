@@ -51,7 +51,7 @@ window.addEventListener("keydown", function(e) {
 });
 window.addEventListener("keyup", function(e) { keys[e.key] = false; });
 canvas.addEventListener("pointerdown", function(e) {
-  e.preventDefault(); initAudio(); mouseDown = true; touchActive = true;
+  e.preventDefault(); canvas.setPointerCapture(e.pointerId); initAudio(); mouseDown = true; touchActive = true;
   if (state === STATE.MENU) startGame();
   if (state === STATE.GAMEOVER) { gameOverScreen.style.display = "flex"; restartGame(); }
 });

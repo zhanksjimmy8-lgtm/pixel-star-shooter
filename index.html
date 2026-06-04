@@ -15,7 +15,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a12; font-family: "Courier New", monospace; user-select: none; -webkit-user-select: none; touch-action: none; }
 #game-container { position: relative; width: 100%; max-width: 960px; height: 100vh; max-height: 640px; margin: 0 auto; overflow: hidden; }
-canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
+canvas { touch-action: none; display: block; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; }
 #ui-overlay { position: absolute; top: 0; left: 0; right: 0; pointer-events: none; padding: 8px 12px; display: flex; justify-content: space-between; align-items: flex-start; }
 #ui-overlay > div { display: flex; gap: 16px; align-items: flex-start; }
 .ui-stat { color: #fff; font-size: 13px; letter-spacing: 2px; text-shadow: 0 0 6px rgba(0,255,255,0.5); }
