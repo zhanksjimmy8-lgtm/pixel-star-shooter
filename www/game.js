@@ -98,10 +98,10 @@ function createEnemy(type) {
   type = type || "basic";
   var y = 20 + Math.random() * (H - 40);
   switch (type) {
-    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.3, hp: 1, type: "basic", score: 100, fireRate: 60, fireTimer: 30 + Math.random() * 50 };
+    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.3, hp: 1, type: "basic", score: 100, fireRate: 35, fireTimer: 20 + Math.random() * 50 };
     case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: -2.6 - Math.random() * 0.5, hp: 1, type: "fast", score: 150, fireRate: 0, fireTimer: 0 };
-    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.7, hp: 3, type: "tank", score: 300, fireRate: 45, fireTimer: 15 + Math.random() * 35 };
-    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -0.9, hp: 2, type: "sniper", score: 250, fireRate: 55, fireTimer: 8 + Math.random() * 35 };
+    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.7, hp: 3, type: "tank", score: 300, fireRate: 25, fireTimer: 10 + Math.random() * 35 };
+    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -0.9, hp: 2, type: "sniper", score: 250, fireRate: 30, fireTimer: 5 + Math.random() * 35 };
   }
 }
 function createAsteroid() {
@@ -228,7 +228,7 @@ function update() {
   if (keys["TouchActive"]) {
     var tdx = touchTargetX - player.x, tdy = touchTargetY - player.y;
     var tdist = Math.sqrt(tdx * tdx + tdy * tdy);
-    if (tdist > 2) { player.dx = tdx / tdist; player.dy = tdy / tdist; }
+    if (tdist > 1) { var ts = Math.min(tdist * 0.8, 4); player.dx = (tdx / tdist) * ts; player.dy = (tdy / tdist) * ts; }
   }
   if (keys["ArrowLeft"] || keys["a"]) player.dx = -1;
   if (keys["ArrowRight"] || keys["d"]) player.dx = 1;
