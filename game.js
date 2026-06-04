@@ -84,7 +84,7 @@ document.getElementById("restart-btn").addEventListener("click", function() { re
 let player, bullets, enemyBullets, enemies, asteroids, powerUps, particles, stars;
 
 function createPlayer() {
-  return { x: 40, y: H / 2, w: 16, h: 14, dx: 0, dy: 0, speed: 1.8,
+  return { x: 40, y: H / 2, w: 16, h: 14, dx: 0, dy: 0, speed: 2.8,
     fireTimer: 0, fireRate: 12, weaponLevel: 1, shieldTimer: 0, invincible: 0, flashTimer: 0 };
 }
 function createBullet(x, y, dy) {
@@ -499,4 +499,5 @@ score = 0; lives = 3;
 highScoreDisplay.textContent = "HIGH " + highScore;
 updateUI();
 gameLoop();
+
 
