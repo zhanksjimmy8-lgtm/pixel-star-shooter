@@ -253,7 +253,7 @@ function rectsCollide(a, b) {
 function update() {
   if (state !== STATE.PLAYING) return;
   frameCount++;
-  difficulty = 1 + Math.floor(frameCount / 4200);
+  difficulty = 1 + Math.floor(frameCount / 2400);
   screenShake *= 0.85;
 
   player.dx = 0; player.dy = 0;
@@ -328,7 +328,7 @@ function update() {
   if (comboTimer > 0) { comboTimer--; if (comboTimer <= 0) comboCount = 0; }
 
   spawnTimer++;
-  var spawnInterval = Math.max(18, 60 - difficulty * 3);
+  var spawnInterval = Math.max(8, 35 - difficulty * 3);
   if (spawnTimer >= spawnInterval) {
     spawnTimer = 0;
     var r = Math.random();
@@ -339,7 +339,7 @@ function update() {
   }
 
   asteroidTimer++;
-  if (asteroidTimer >= Math.max(40, 120 - difficulty * 4)) {
+  if (asteroidTimer >= Math.max(20, 70 - difficulty * 4)) {
     asteroidTimer = 0; asteroids.push(createAsteroid());
   }
 
@@ -576,6 +576,7 @@ score = 0; lives = 3;
 highScoreDisplay.textContent = "HIGH " + highScore;
 updateUI();
 gameLoop();
+
 
 
 
