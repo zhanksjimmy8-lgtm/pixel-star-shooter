@@ -92,21 +92,21 @@ function createBullet(x, y, dy) {
   return { x: x, y: y, w: 5, h: 3, dx: 6, dy: dy };
 }
 function createEnemyBullet(x, y) {
-  return { x: x, y: y, w: 3, h: 3, dx: -4, dy: 0 };
+  return { x: x, y: y, w: 3, h: 3, dx: -5, dy: 0 };
 }
 function createEnemy(type) {
   type = type || "basic";
   var y = 20 + Math.random() * (H - 40);
   switch (type) {
-    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.3, hp: 1, type: "basic", score: 100, fireRate: 10, fireTimer: 5 + Math.random() * 50 };
-    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: -2.6 - Math.random() * 0.5, hp: 1, type: "fast", score: 150, fireRate: 35, fireTimer: 10 + Math.random() * 30 };
-    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.7, hp: 3, type: "tank", score: 300, fireRate: 7, fireTimer: 3 + Math.random() * 35 };
-    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -0.9, hp: 2, type: "sniper", score: 250, fireRate: 8, fireTimer: 2 + Math.random() * 35 };
+    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.6, hp: 1, type: "basic", score: 100, fireRate: 10, fireTimer: 5 + Math.random() * 50 };
+    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: -3.2 - Math.random() * 0.5, hp: 1, type: "fast", score: 150, fireRate: 35, fireTimer: 10 + Math.random() * 30 };
+    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.9, hp: 3, type: "tank", score: 300, fireRate: 7, fireTimer: 3 + Math.random() * 35 };
+    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -1.1, hp: 2, type: "sniper", score: 250, fireRate: 8, fireTimer: 2 + Math.random() * 35 };
   }
 }
 function createAsteroid() {
   var size = 10 + Math.random() * 16;
-  return { x: W + size, y: Math.random() * H, w: size, h: size, dx: -(1.0 + Math.random() * 1.8),
+  return { x: W + size, y: Math.random() * H, w: size, h: size, dx: -(1.3 + Math.random() * 2.2),
     dy: (Math.random() - 0.5) * 0.8, hp: Math.ceil(size / 8), alive: true,
     rot: Math.random() * Math.PI * 2, rotSpeed: (Math.random() - 0.5) * 0.08 };
 }
@@ -339,7 +339,7 @@ function update() {
   }
 
   asteroidTimer++;
-  if (asteroidTimer >= Math.max(20, 70 - difficulty * 4)) {
+  if (asteroidTimer >= Math.max(10, 45 - difficulty * 4)) {
     asteroidTimer = 0; asteroids.push(createAsteroid());
   }
 
