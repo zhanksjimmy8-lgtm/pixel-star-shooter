@@ -92,16 +92,16 @@ function createBullet(x, y, dy) {
   return { x: x, y: y, w: 5, h: 3, dx: 6, dy: dy };
 }
 function createEnemyBullet(x, y) {
-  return { x: x, y: y, w: 3, h: 3, dx: -3, dy: 0 };
+  return { x: x, y: y, w: 3, h: 3, dx: -4, dy: 0 };
 }
 function createEnemy(type) {
   type = type || "basic";
   var y = 20 + Math.random() * (H - 40);
   switch (type) {
-    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.3, hp: 1, type: "basic", score: 100, fireRate: 35, fireTimer: 20 + Math.random() * 50 };
-    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: -2.6 - Math.random() * 0.5, hp: 1, type: "fast", score: 150, fireRate: 0, fireTimer: 0 };
-    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.7, hp: 3, type: "tank", score: 300, fireRate: 25, fireTimer: 10 + Math.random() * 35 };
-    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -0.9, hp: 2, type: "sniper", score: 250, fireRate: 30, fireTimer: 5 + Math.random() * 35 };
+    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.3, hp: 1, type: "basic", score: 100, fireRate: 18, fireTimer: 10 + Math.random() * 50 };
+    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: -2.6 - Math.random() * 0.5, hp: 1, type: "fast", score: 150, fireRate: 60, fireTimer: 20 + Math.random() * 40 };
+    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.7, hp: 3, type: "tank", score: 300, fireRate: 12, fireTimer: 5 + Math.random() * 35 };
+    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -0.9, hp: 2, type: "sniper", score: 250, fireRate: 15, fireTimer: 3 + Math.random() * 35 };
   }
 }
 function createAsteroid() {
