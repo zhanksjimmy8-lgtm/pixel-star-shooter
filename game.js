@@ -51,15 +51,17 @@ window.addEventListener("keydown", function(e) {
 });
 window.addEventListener("keyup", function(e) { keys[e.key] = false; });
 canvas.addEventListener("pointerdown", function(e) {
-  e.preventDefault(); canvas.setPointerCapture(e.pointerId); initAudio(); mouseDown = true; touchActive = true;
+  e.preventDefault(); canvas.setPointerCapture(e.pointerId); initAudio(); mouseDown = true; keys["TouchActive"] = true;
+  var rect = canvas.getBoundingClientRect();
+  touchTargetX = (e.clientX - rect.left) / rect.width * W;
+  touchTargetY = (e.clientY - rect.top) / rect.height * H;
   if (state === STATE.MENU) startGame();
   if (state === STATE.GAMEOVER) { gameOverScreen.style.display = "flex"; restartGame(); }
 });
-canvas.addEventListener("pointerup", function(e) { mouseDown = false; touchActive = false; try { canvas.releasePointerCapture(e.pointerId); } catch(ex) {} });
-canvas.addEventListener("pointercancel", function(e) { mouseDown = false; touchActive = false; });
+canvas.addEventListener("pointerup", function(e) { mouseDown = false; keys["TouchActive"] = false; try { canvas.releasePointerCapture(e.pointerId); } catch(ex) {} });
 canvas.addEventListener("pointermove", function(e) {
   e.preventDefault();
-  if (touchActive) {
+  if (keys["TouchActive"]) {
     var rect = canvas.getBoundingClientRect();
     touchTargetX = (e.clientX - rect.left) / rect.width * W;
     touchTargetY = (e.clientY - rect.top) / rect.height * H;
@@ -222,18 +224,16 @@ function update() {
   difficulty = 1 + Math.floor(frameCount / 4200);
   screenShake *= 0.85;
 
-  if (touchActive) {
-    var dx = touchTargetX - player.x, dy = touchTargetY - player.y;
-    var dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist > 3) { player.dx = dx / dist; player.dy = dy / dist; }
-    else { player.dx = 0; player.dy = 0; }
-  } else {
-    player.dx = 0; player.dy = 0;
-    if (keys["ArrowLeft"] || keys["a"]) player.dx = -1;
-    if (keys["ArrowRight"] || keys["d"]) player.dx = 1;
-    if (keys["ArrowUp"] || keys["w"]) player.dy = -1;
-    if (keys["ArrowDown"] || keys["s"]) player.dy = 1;
+  player.dx = 0; player.dy = 0;
+  if (keys["TouchActive"]) {
+    var tdx = touchTargetX - player.x, tdy = touchTargetY - player.y;
+    var tdist = Math.sqrt(tdx * tdx + tdy * tdy);
+    if (tdist > 2) { player.dx = tdx / tdist; player.dy = tdy / tdist; }
   }
+  if (keys["ArrowLeft"] || keys["a"]) player.dx = -1;
+  if (keys["ArrowRight"] || keys["d"]) player.dx = 1;
+  if (keys["ArrowUp"] || keys["w"]) player.dy = -1;
+  if (keys["ArrowDown"] || keys["s"]) player.dy = 1;
   if (player.dx !== 0 && player.dy !== 0) { player.dx *= 0.7; player.dy *= 0.7; }
   player.x += player.dx * player.speed;
   player.y += player.dy * player.speed;
