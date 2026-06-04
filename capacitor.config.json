@@ -1,0 +1,11 @@
+{
+  "appId": "com.pixelstar.shooter",
+  "appName": "星际战机",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": [
+      "*"
+    ]
+  }
+}
