@@ -158,54 +158,44 @@ function updateUI() {
 function drawPixelShip(x, y, w, h, color, accent) {
   var cx = Math.floor(x), cy = Math.floor(y);
 
-  // Engine glow (flicker, left side)
+  // Engine glow (left side, flickering)
   if (Math.random() > 0.3) {
     ctx.fillStyle = "#ff6600";
-    ctx.fillRect(cx - 8, cy - 1, 3, 2);
+    ctx.fillRect(cx - 9, cy - 1, 2, 2);
     ctx.fillStyle = "#ffaa00";
-    ctx.fillRect(cx - 9, cy, 2, 1);
+    ctx.fillRect(cx - 11, cy, 3, 1);
   }
 
-  // Main body (horizontal, left-to-right)
-  ctx.fillStyle = "#558866";
-  ctx.fillRect(cx - 5, cy - 2, 8, 4);
-  ctx.fillStyle = "#44aa66";
-  ctx.fillRect(cx - 2, cy - 3, 5, 2);
+  // Main hull - sleek horizontal body
+  ctx.fillStyle = "#226644";
+  ctx.fillRect(cx - 7, cy - 2, 10, 4);
+  ctx.fillStyle = "#33aa55";
+  ctx.fillRect(cx - 5, cy - 2, 7, 1);
+  ctx.fillRect(cx - 5, cy + 1, 7, 1);
+  ctx.fillStyle = "#44cc66";
+  ctx.fillRect(cx - 3, cy - 1, 5, 2);
 
   // Cockpit
   ctx.fillStyle = "#88ffcc";
-  ctx.fillRect(cx + 2, cy - 2, 2, 2);
-  ctx.fillRect(cx + 3, cy - 1, 1, 1);
+  ctx.fillRect(cx + 1, cy - 1, 2, 2);
 
-  // Nose (pointing right)
-  ctx.fillStyle = "#66cc88";
-  ctx.fillRect(cx + 5, cy - 1, 2, 1);
-  ctx.fillRect(cx + 6, cy, 2, 1);
-  ctx.fillRect(cx + 7, cy, 1, 1);
+  // Nose cone (pointing right)
+  ctx.fillStyle = "#55dd77";
+  ctx.fillRect(cx + 3, cy - 1, 1, 2);
+  ctx.fillRect(cx + 4, cy, 1, 1);
+  ctx.fillStyle = "#66ee88";
+  ctx.fillRect(cx + 5, cy, 1, 1);
 
-  // Top wing
-  ctx.fillStyle = "#338855";
-  ctx.fillRect(cx - 3, cy - 5, 2, 3);
-  ctx.fillRect(cx - 2, cy - 6, 2, 2);
-  ctx.fillStyle = "#44aa66";
-  ctx.fillRect(cx, cy - 5, 1, 1);
+  // Small stabilizer fins
+  ctx.fillStyle = "#228855";
+  ctx.fillRect(cx - 5, cy - 3, 1, 1);
+  ctx.fillRect(cx - 5, cy + 2, 1, 1);
+  ctx.fillRect(cx - 3, cy + 3, 1, 1);
+  ctx.fillRect(cx - 3, cy - 4, 1, 1);
 
-  // Bottom wing
-  ctx.fillStyle = "#338855";
-  ctx.fillRect(cx - 3, cy + 2, 2, 3);
-  ctx.fillRect(cx - 2, cy + 4, 2, 2);
-  ctx.fillStyle = "#44aa66";
-  ctx.fillRect(cx, cy + 4, 1, 1);
-
-  // Wing tips
-  ctx.fillStyle = "#66dd88";
-  ctx.fillRect(cx - 3, cy - 7, 1, 1);
-  ctx.fillRect(cx - 3, cy + 6, 1, 1);
-
-  // Tail fins
-  ctx.fillStyle = "#338855";
-  ctx.fillRect(cx - 7, cy - 3, 1, 2);
-  ctx.fillRect(cx - 7, cy + 1, 1, 2);
+  // Engine housing
+  ctx.fillStyle = "#115533";
+  ctx.fillRect(cx - 8, cy - 1, 2, 2);
 }
 function drawEnemyBasic(x, y) {
   ctx.fillStyle = "#ff4444"; ctx.fillRect(x - 6, y - 5, 12, 10); ctx.fillRect(x - 3, y - 7, 6, 4);
