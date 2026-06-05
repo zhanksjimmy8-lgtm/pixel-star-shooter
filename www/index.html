@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="星际战机">
+<meta name="apple-mobile-web-app-title" content="鏄熼檯鎴樻満">
 <meta name="theme-color" content="#0a0a14">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>星际战机</title>
+<title>鏄熼檯鎴樻満</title>
 <style>
 @charset "UTF-8";
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,27 +46,28 @@ canvas { touch-action: none; display: block; width: 100%; height: 100%; image-re
 </div>
 <div id="start-screen">
 
-<div class="screen-title">星际战机</div>
+<div class="screen-title">鏄熼檯鎴樻満</div>
 <div class="screen-subtitle">PIXEL SPACE SHOOTER</div>
-<button class="screen-btn" id="start-btn" autofocus>开 始</button>
-<div class="controls-hint"><span>方向键</span> 移动 · <span>空格</span> 射击 · <span>P</span> 暂停</div>
+<button class="screen-btn" id="start-btn" autofocus>寮€ 濮?/button>
+<div class="controls-hint"><span>鏂瑰悜閿?/span> 绉诲姩 路 <span>绌烘牸</span> 灏勫嚮 路 <span>P</span> 鏆傚仠</div>
 </div>
 <div id="game-over-screen">
-<div class="screen-title">坠 毁</div>
-<div id="final-score">得分 0</div>
-<div id="high-score-display">最高 0</div>
-<button class="screen-btn" id="restart-btn">再 来</button>
+<div class="screen-title">鍧?姣?/div>
+<div id="final-score">寰楀垎 0</div>
+<div id="high-score-display">鏈€楂?0</div>
+<button class="screen-btn" id="restart-btn">鍐?鏉?/button>
 </div>
 <div id="mobile-controls">
-<button class="mobile-btn" id="btn-up">▲</button>
-<button class="mobile-btn" id="btn-left">◀</button>
-<button class="mobile-btn shoot" id="btn-shoot">◎</button>
-<button class="mobile-btn" id="btn-right">▶</button>
-<button class="mobile-btn" id="btn-down">▼</button>
+<button class="mobile-btn" id="btn-up">鈻?/button>
+<button class="mobile-btn" id="btn-left">鈼€</button>
+<button class="mobile-btn shoot" id="btn-shoot">鈼?/button>
+<button class="mobile-btn" id="btn-right">鈻?/button>
+<button class="mobile-btn" id="btn-down">鈻?/button>
 </div>
-<button id="lb-close" onclick="toggleLB()">关闭</button></div>
+<button id="lb-close" onclick="toggleLB()">鍏抽棴</button></div>
 </div>
 <script src="game.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js");}</script>
 </body>
 </html>
+
