@@ -92,23 +92,23 @@ function createBullet(x, y, dy) {
   return { x: x, y: y, w: 5, h: 3, dx: 6, dy: dy };
 }
 function createEnemyBullet(x, y) {
-  return { x: x, y: y, w: 3, h: 3, dx: -5 - difficulty, dy: 0 };
+  return { x: x, y: y, w: 3, h: 3, dx: -3 - difficulty * 0.5, dy: 0 };
 }
 function createEnemy(type) {
-  var speedMul = 1 + (difficulty - 1) * 0.2;
+  var speedMul = 1 + (difficulty - 1) * 0.15;
   type = type || "basic";
   var y = 20 + Math.random() * (H - 40);
   switch (type) {
-    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -2.5 * speedMul, hp: 1, type: "basic", score: 100, fireRate: 10, fireTimer: 5 + Math.random() * 50 };
-    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: (-4.5 - Math.random() * 0.8) * speedMul, hp: 1, type: "fast", score: 150, fireRate: 35, fireTimer: 10 + Math.random() * 30 };
-    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -1.4 * speedMul, hp: 3, type: "tank", score: 300, fireRate: 7, fireTimer: 3 + Math.random() * 35 };
-    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -1.6 * speedMul, hp: 2, type: "sniper", score: 250, fireRate: 8, fireTimer: 2 + Math.random() * 35 };
+    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.5 * speedMul, hp: 1, type: "basic", score: 100, fireRate: 10, fireTimer: 5 + Math.random() * 50 };
+    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: (-2.8 - Math.random() * 0.5) * speedMul, hp: 1, type: "fast", score: 150, fireRate: 35, fireTimer: 10 + Math.random() * 30 };
+    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.7 * speedMul, hp: 3, type: "tank", score: 300, fireRate: 7, fireTimer: 3 + Math.random() * 35 };
+    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -1.0 * speedMul, hp: 2, type: "sniper", score: 250, fireRate: 8, fireTimer: 2 + Math.random() * 35 };
   }
 }
 function createAsteroid() {
-  var speedMul = 1 + (difficulty - 1) * 0.2;
+  var speedMul = 1 + (difficulty - 1) * 0.15;
   var size = 10 + Math.random() * 16;
-  return { x: W + size, y: Math.random() * H, w: size, h: size, dx: -(2.0 + Math.random() * 3.0) * speedMul,
+  return { x: W + size, y: Math.random() * H, w: size, h: size, dx: -(1.0 + Math.random() * 1.5) * speedMul,
     dy: (Math.random() - 0.5) * 0.8, hp: Math.ceil(size / 8), alive: true,
     rot: Math.random() * Math.PI * 2, rotSpeed: (Math.random() - 0.5) * 0.08 };
 }
@@ -160,44 +160,72 @@ function updateUI() {
 function drawPixelShip(x, y, w, h, color, accent) {
   var cx = Math.floor(x), cy = Math.floor(y);
 
-  // Engine glow (left side, flickering)
-  if (Math.random() > 0.3) {
-    ctx.fillStyle = "#ff6600";
-    ctx.fillRect(cx - 9, cy - 1, 2, 2);
-    ctx.fillStyle = "#ffaa00";
-    ctx.fillRect(cx - 11, cy, 3, 1);
+  // Engine exhaust (flickering flame)
+  if (Math.random() > 0.2) {
+    ctx.fillStyle = "#ff4400";
+    ctx.fillRect(cx - 11, cy - 2, 2, 4);
+    ctx.fillStyle = "#ff8800";
+    ctx.fillRect(cx - 12, cy - 1, 2, 2);
+    ctx.fillStyle = "#ffcc00";
+    ctx.fillRect(cx - 13, cy, 2, 1);
+  } else {
+    ctx.fillStyle = "#ff2200";
+    ctx.fillRect(cx - 11, cy - 1, 1, 2);
   }
 
-  // Main hull - sleek horizontal body
-  ctx.fillStyle = "#226644";
-  ctx.fillRect(cx - 7, cy - 2, 10, 4);
-  ctx.fillStyle = "#33aa55";
-  ctx.fillRect(cx - 5, cy - 2, 7, 1);
-  ctx.fillRect(cx - 5, cy + 1, 7, 1);
-  ctx.fillStyle = "#44cc66";
-  ctx.fillRect(cx - 3, cy - 1, 5, 2);
-
-  // Cockpit
-  ctx.fillStyle = "#88ffcc";
-  ctx.fillRect(cx + 1, cy - 1, 2, 2);
-
-  // Nose cone (pointing right)
-  ctx.fillStyle = "#55dd77";
-  ctx.fillRect(cx + 3, cy - 1, 1, 2);
-  ctx.fillRect(cx + 4, cy, 1, 1);
-  ctx.fillStyle = "#66ee88";
-  ctx.fillRect(cx + 5, cy, 1, 1);
-
-  // Small stabilizer fins
-  ctx.fillStyle = "#228855";
-  ctx.fillRect(cx - 5, cy - 3, 1, 1);
-  ctx.fillRect(cx - 5, cy + 2, 1, 1);
-  ctx.fillRect(cx - 3, cy + 3, 1, 1);
-  ctx.fillRect(cx - 3, cy - 4, 1, 1);
-
   // Engine housing
-  ctx.fillStyle = "#115533";
-  ctx.fillRect(cx - 8, cy - 1, 2, 2);
+  ctx.fillStyle = "#114433";
+  ctx.fillRect(cx - 10, cy - 2, 3, 4);
+  ctx.fillStyle = "#226655";
+  ctx.fillRect(cx - 9, cy - 1, 2, 2);
+
+  // Main fuselage - long horizontal body
+  ctx.fillStyle = "#1a5533";
+  ctx.fillRect(cx - 7, cy - 3, 12, 6);
+  ctx.fillStyle = "#228844";
+  ctx.fillRect(cx - 5, cy - 3, 8, 1);
+  ctx.fillRect(cx - 5, cy + 2, 8, 1);
+  ctx.fillStyle = "#33aa55";
+  ctx.fillRect(cx - 3, cy - 2, 6, 4);
+  ctx.fillStyle = "#44cc66";
+  ctx.fillRect(cx - 1, cy - 1, 3, 2);
+
+  // Cockpit glass
+  ctx.fillStyle = "#aaffee";
+  ctx.fillRect(cx + 1, cy - 1, 2, 2);
+  ctx.fillRect(cx + 2, cy, 1, 1);
+
+  // Nose cone (long, sleek, pointing right)
+  ctx.fillStyle = "#55dd77";
+  ctx.fillRect(cx + 5, cy - 1, 1, 2);
+  ctx.fillRect(cx + 6, cy, 1, 1);
+  ctx.fillStyle = "#66ee88";
+  ctx.fillRect(cx + 7, cy, 1, 1);
+
+  // Top wing - swept back
+  ctx.fillStyle = "#1a6644";
+  ctx.fillRect(cx - 5, cy - 5, 3, 2);
+  ctx.fillRect(cx - 3, cy - 6, 2, 1);
+  ctx.fillStyle = "#228855";
+  ctx.fillRect(cx - 2, cy - 4, 1, 1);
+
+  // Bottom wing - swept back  
+  ctx.fillStyle = "#1a6644";
+  ctx.fillRect(cx - 5, cy + 3, 3, 2);
+  ctx.fillRect(cx - 3, cy + 5, 2, 1);
+  ctx.fillStyle = "#228855";
+  ctx.fillRect(cx - 2, cy + 3, 1, 1);
+
+  // Tail stabilizer fins
+  ctx.fillStyle = "#115544";
+  ctx.fillRect(cx - 8, cy - 4, 1, 2);
+  ctx.fillRect(cx - 8, cy + 2, 1, 2);
+  ctx.fillStyle = "#228866";
+  ctx.fillRect(cx - 7, cy - 5, 1, 1);
+  ctx.fillRect(cx - 7, cy + 4, 1, 1);
+
+  // Shield glow if active
+  
 }
 function drawEnemyBasic(x, y) {
   ctx.fillStyle = "#ff4444"; ctx.fillRect(x - 6, y - 5, 12, 10); ctx.fillRect(x - 3, y - 7, 6, 4);
@@ -255,7 +283,7 @@ function rectsCollide(a, b) {
 function update() {
   if (state !== STATE.PLAYING) return;
   frameCount++;
-  difficulty = 1 + Math.floor(frameCount / 1500);
+  difficulty = 1 + Math.floor(frameCount / 3000);
   screenShake *= 0.85;
 
   player.dx = 0; player.dy = 0;
@@ -330,7 +358,7 @@ function update() {
   if (comboTimer > 0) { comboTimer--; if (comboTimer <= 0) comboCount = 0; }
 
   spawnTimer++;
-  var spawnInterval = Math.max(5, 28 - difficulty * 3);
+  var spawnInterval = Math.max(10, 35 - difficulty * 3);
   if (spawnTimer >= spawnInterval) {
     spawnTimer = 0;
     if (difficulty >= 5 && Math.random() < 0.3) { enemies.push(createEnemy("basic")); }
@@ -342,7 +370,7 @@ function update() {
   }
 
   asteroidTimer++;
-  if (asteroidTimer >= Math.max(6, 35 - difficulty * 4)) {
+  if (asteroidTimer >= Math.max(12, 45 - difficulty * 4)) {
     asteroidTimer = 0; asteroids.push(createAsteroid());
   }
 
@@ -474,8 +502,8 @@ function draw() {
 
   if (player.invincible <= 0 || player.flashTimer % 6 < 3) {
     drawPixelShip(player.x, player.y, player.w, player.h,
-      player.shieldTimer > 0 ? "#44ccff" : "#44ff88",
-      player.shieldTimer > 0 ? "#88eeff" : "#88ffaa");
+      #44ff88,
+      #88ffaa);
     if (player.shieldTimer > 0) {
       ctx.strokeStyle = "rgba(68,204,255,0.6)"; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.arc(player.x, player.y, 12, 0, Math.PI * 2); ctx.stroke();
