@@ -285,7 +285,7 @@ function rectsCollide(a, b) {
 function update() {
   if (state !== STATE.PLAYING) return;
   frameCount++;
-  difficulty = 1 + Math.floor(frameCount / 3000);
+  difficulty = 1 + Math.floor(frameCount / 1500);
   screenShake *= 0.85;
 
   player.dx = 0; player.dy = 0;
@@ -694,6 +694,7 @@ score = 0; lives = 3;
 highScoreDisplay.textContent = "HIGH " + highScore;
 updateUI();
 gameLoop();
+
 
 
 
