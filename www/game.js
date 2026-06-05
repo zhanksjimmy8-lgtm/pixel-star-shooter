@@ -1,5 +1,6 @@
 ﻿
-锘縞onst canvas = document.getElementById("game");
+window.onerror = function(msg, url, line) { alert("JS Error: " + msg + " at line " + line); };
+﻿const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const W = 320, H = 200;
 canvas.width = W; canvas.height = H;
@@ -16,6 +17,123 @@ const highScoreDisplay = document.getElementById("high-score-display");
 let audioCtx = null;
 function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
 function playBeep(freq, dur, type, vol) {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type; osc.frequency.value = freq;
+  gain.gain.setValueAtTime(vol, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(t); osc.stop(t + dur);
+}
+function sfxShoot() { playBeep(800, 0.06, "square", 0.04); }
+function sfxHit() { playBeep(120, 0.12, "sawtooth", 0.07); }
+function sfxExplode() { playBeep(60, 0.2, "sawtooth", 0.08); }
+function sfxPowerUp() { playBeep(1200, 0.08, "square", 0.05); setTimeout(function() { playBeep(1600, 0.08, "square", 0.05); }, 80); }
+function sfxDie() { playBeep(200, 0.3, "sawtooth", 0.1); setTimeout(function() { playBeep(100, 0.4, "sawtooth", 0.1); }, 150); }
+
+const STATE = { MENU: 0, PLAYING: 1, PAUSED: 2, GAMEOVER: 3 };
+let state = STATE.MENU;
+let score = 0, highScore = parseInt(localStorage.getItem("pxsh_hs") || "0");
+let lives = 3, comboCount = 0, comboTimer = 0;
+let screenShake = 0, frameCount = 0;
+let spawnTimer = 0, asteroidTimer = 0, difficulty = 1;
+
+const keys = {};
+let mouseDown = false, touchShooting = false;
+
+window.addEventListener("keydown", function(e) {
+  keys[e.key] = true;
+  if (e.key === " " || e.key === "ArrowUp" || e.key === "ArrowDown") e.preventDefault();
+  if (e.key === "p" || e.key === "P") {
+    if (state === STATE.PLAYING) state = STATE.PAUSED;
+    else if (state === STATE.PAUSED) state = STATE.PLAYING;
+  }
+});
+window.addEventListener("keyup", function(e) { keys[e.key] = false; });
+canvas.addEventListener("pointerdown", function(e) {
+  e.preventDefault(); canvas.setPointerCapture(e.pointerId); initAudio(); mouseDown = true; keys["TouchActive"] = true;
+  var rect = canvas.getBoundingClientRect();
+  touchTargetX = (e.clientX - rect.left) / rect.width * W;
+  touchTargetY = (e.clientY - rect.top) / rect.height * H;
+  if (state === STATE.MENU) startGame();
+  if (state === STATE.GAMEOVER) { gameOverScreen.style.display = "flex"; restartGame(); }
+});
+canvas.addEventListener("pointerup", function(e) { mouseDown = false; keys["TouchActive"] = false; try { canvas.releasePointerCapture(e.pointerId); } catch(ex) {} });
+canvas.addEventListener("pointermove", function(e) {
+  e.preventDefault();
+  if (keys["TouchActive"]) {
+    var rect = canvas.getBoundingClientRect();
+    touchTargetX = (e.clientX - rect.left) / rect.width * W;
+    touchTargetY = (e.clientY - rect.top) / rect.height * H;
+  }
+});
+
+document.getElementById("btn-up").addEventListener("pointerdown", function(e) { e.preventDefault(); keys["ArrowUp"] = true; });
+document.getElementById("btn-up").addEventListener("pointerup", function() { keys["ArrowUp"] = false; });
+document.getElementById("btn-down").addEventListener("pointerdown", function(e) { e.preventDefault(); keys["ArrowDown"] = true; });
+document.getElementById("btn-down").addEventListener("pointerup", function() { keys["ArrowDown"] = false; });
+document.getElementById("btn-left").addEventListener("pointerdown", function(e) { e.preventDefault(); keys["ArrowLeft"] = true; });
+document.getElementById("btn-left").addEventListener("pointerup", function() { keys["ArrowLeft"] = false; });
+document.getElementById("btn-right").addEventListener("pointerdown", function(e) { e.preventDefault(); keys["ArrowRight"] = true; });
+document.getElementById("btn-right").addEventListener("pointerup", function() { keys["ArrowRight"] = false; });
+document.getElementById("btn-shoot").addEventListener("pointerdown", function(e) { e.preventDefault(); touchShooting = true; });
+document.getElementById("btn-shoot").addEventListener("pointerup", function() { touchShooting = false; });
+document.getElementById("start-btn").addEventListener("click", function() { initAudio(); startGame(); });
+document.getElementById("restart-btn").addEventListener("click", function() { restartGame(); });
+
+let player, bullets, enemyBullets, enemies, asteroids, powerUps, particles, stars;
+
+function createPlayer() {
+  return { x: 40, y: H / 2, w: 16, h: 14, dx: 0, dy: 0, speed: 2.8,
+    fireTimer: 0, fireRate: 12, weaponLevel: 1, shieldTimer: 0, invincible: 0, flashTimer: 0 };
+}
+function createBullet(x, y, dy) {
+  if (dy === undefined) dy = 0;
+  return { x: x, y: y, w: 5, h: 3, dx: 6, dy: dy };
+}
+function createEnemyBullet(x, y) {
+  return { x: x, y: y, w: 3, h: 3, dx: -3 - difficulty * 0.5, dy: 0 };
+}
+function createEnemy(type) {
+  var speedMul = 1 + (difficulty - 1) * 0.15;
+  type = type || "basic";
+  var y = 20 + Math.random() * (H - 40);
+  switch (type) {
+    case "basic": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 14, h: 12, dx: -1.5 * speedMul, hp: 1, type: "basic", score: 100, fireRate: 10, fireTimer: 5 + Math.random() * 50 };
+    case "fast": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 10, h: 8, dx: (-2.8 - Math.random() * 0.5) * speedMul, hp: 1, type: "fast", score: 150, fireRate: 35, fireTimer: 10 + Math.random() * 30 };
+    case "tank": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 20, h: 16, dx: -0.7 * speedMul, hp: 3, type: "tank", score: 300, fireRate: 7, fireTimer: 3 + Math.random() * 35 };
+    case "sniper": return { x: W + 10, y: y, alive: true, flashTimer: 0, w: 12, h: 18, dx: -1.0 * speedMul, hp: 2, type: "sniper", score: 250, fireRate: 8, fireTimer: 2 + Math.random() * 35 };
+  }
+}
+function createAsteroid() {
+  var speedMul = 1 + (difficulty - 1) * 0.15;
+  var size = 10 + Math.random() * 16;
+  return { x: W + size, y: Math.random() * H, w: size, h: size, dx: -(1.0 + Math.random() * 1.5) * speedMul,
+    dy: (Math.random() - 0.5) * 0.8, hp: Math.ceil(size / 8), alive: true,
+    rot: Math.random() * Math.PI * 2, rotSpeed: (Math.random() - 0.5) * 0.08 };
+}
+function createPowerUp(x, y) {
+  var types = ["weapon", "rapid", "shield", "life"];
+  var weights = [0.4, 0.25, 0.2, 0.15];
+  var r = Math.random();
+  var type = types[0], cum = 0;
+  for (var i = 0; i < types.length; i++) { cum += weights[i]; if (r < cum) { type = types[i]; break; } }
+  return { x: x, y: y, w: 10, h: 10, dx: -0.7, type: type, alive: true, life: 300 };
+}
+function createParticle(x, y, color, count) {
+  color = color || "#ff6600"; count = count || 8;
+  var parts = [];
+  for (var i = 0; i < count; i++) {
+    var angle = Math.random() * Math.PI * 2, speed = 1 + Math.random() * 4;
+    parts.push({ x: x, y: y, dx: Math.cos(angle) * speed, dy: Math.sin(angle) * speed,
+      life: 15 + Math.random() * 15, maxLife: 30, color: color });
+  }
+  return parts;
+}
+
+function resetGame() {
   player = createPlayer();
   bullets = []; enemyBullets = []; enemies = []; asteroids = []; powerUps = []; particles = [];
   stars = [];
@@ -42,21 +160,74 @@ function updateUI() {
 }
 
 function drawPixelShip(x, y, w, h, color, accent) {
-  ctx.fillStyle = color;
-  ctx.fillRect(x - w / 2 + 2, y - 2, w - 4, h - 6);
-  ctx.fillRect(x - 1, y - h / 2 - 2, 3, 5);
-  ctx.fillStyle = accent;
-  ctx.fillRect(x - 1, y - 3, 3, 3);
-  ctx.fillStyle = "#ff6600";
-  ctx.fillRect(x - 2, y + h / 2 - 3, 2, 3);
-  ctx.fillRect(x + 1, y + h / 2 - 3, 2, 3);
-  if (player.shieldTimer > 0) {
-    ctx.strokeStyle = "rgba(68,204,255,0.4)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(x, y, 14, 0, Math.PI * 2);
-    ctx.stroke();
+  var cx = Math.floor(x), cy = Math.floor(y);
+
+  // Engine exhaust (flickering flame)
+  if (Math.random() > 0.2) {
+    ctx.fillStyle = "#ff4400";
+    ctx.fillRect(cx - 11, cy - 2, 2, 4);
+    ctx.fillStyle = "#ff8800";
+    ctx.fillRect(cx - 12, cy - 1, 2, 2);
+    ctx.fillStyle = "#ffcc00";
+    ctx.fillRect(cx - 13, cy, 2, 1);
+  } else {
+    ctx.fillStyle = "#ff2200";
+    ctx.fillRect(cx - 11, cy - 1, 1, 2);
   }
+
+  // Engine housing
+  ctx.fillStyle = "#114433";
+  ctx.fillRect(cx - 10, cy - 2, 3, 4);
+  ctx.fillStyle = "#226655";
+  ctx.fillRect(cx - 9, cy - 1, 2, 2);
+
+  // Main fuselage - long horizontal body
+  ctx.fillStyle = "#1a5533";
+  ctx.fillRect(cx - 7, cy - 3, 12, 6);
+  ctx.fillStyle = "#228844";
+  ctx.fillRect(cx - 5, cy - 3, 8, 1);
+  ctx.fillRect(cx - 5, cy + 2, 8, 1);
+  ctx.fillStyle = "#33aa55";
+  ctx.fillRect(cx - 3, cy - 2, 6, 4);
+  ctx.fillStyle = "#44cc66";
+  ctx.fillRect(cx - 1, cy - 1, 3, 2);
+
+  // Cockpit glass
+  ctx.fillStyle = "#aaffee";
+  ctx.fillRect(cx + 1, cy - 1, 2, 2);
+  ctx.fillRect(cx + 2, cy, 1, 1);
+
+  // Nose cone (long, sleek, pointing right)
+  ctx.fillStyle = "#55dd77";
+  ctx.fillRect(cx + 5, cy - 1, 1, 2);
+  ctx.fillRect(cx + 6, cy, 1, 1);
+  ctx.fillStyle = "#66ee88";
+  ctx.fillRect(cx + 7, cy, 1, 1);
+
+  // Top wing - swept back
+  ctx.fillStyle = "#1a6644";
+  ctx.fillRect(cx - 5, cy - 5, 3, 2);
+  ctx.fillRect(cx - 3, cy - 6, 2, 1);
+  ctx.fillStyle = "#228855";
+  ctx.fillRect(cx - 2, cy - 4, 1, 1);
+
+  // Bottom wing - swept back  
+  ctx.fillStyle = "#1a6644";
+  ctx.fillRect(cx - 5, cy + 3, 3, 2);
+  ctx.fillRect(cx - 3, cy + 5, 2, 1);
+  ctx.fillStyle = "#228855";
+  ctx.fillRect(cx - 2, cy + 3, 1, 1);
+
+  // Tail stabilizer fins
+  ctx.fillStyle = "#115544";
+  ctx.fillRect(cx - 8, cy - 4, 1, 2);
+  ctx.fillRect(cx - 8, cy + 2, 1, 2);
+  ctx.fillStyle = "#228866";
+  ctx.fillRect(cx - 7, cy - 5, 1, 1);
+  ctx.fillRect(cx - 7, cy + 4, 1, 1);
+
+  // Shield glow if active
+  
 }
 function drawEnemyBasic(x, y) {
   ctx.fillStyle = "#ff4444"; ctx.fillRect(x - 6, y - 5, 12, 10); ctx.fillRect(x - 3, y - 7, 6, 4);
@@ -333,8 +504,8 @@ function draw() {
 
   if (player.invincible <= 0 || player.flashTimer % 6 < 3) {
     drawPixelShip(player.x, player.y, player.w, player.h,
-      player.shieldTimer > 0 ? "#44ccff" : "#44ff88",
-      player.shieldTimer > 0 ? "#88eeff" : "#88ffaa");
+      "#44ff88",
+      "#88ffaa");
     // shield rendered in drawPixelShip
   }
 
@@ -375,17 +546,19 @@ function gameOver() {
   finalScore.textContent = "SCORE " + score;
   highScoreDisplay.textContent = "HIGH " + highScore;
   gameOverScreen.style.display = "flex"; updateUI();
+  saveScoreSupabase(score);
 }
+
+
 
 // ── Supabase Leaderboard ──
 function saveScoreSupabase(s) {
-  if (!supabase) { saveScoreLocal(s); return; }
+  if (typeof supabase === "undefined" || !supabase) { saveScoreLocal(s); return; }
   var uname = getCurrentUsername();
   if (!uname) { saveScoreLocal(s); return; }
   supabase.auth.getSession().then(function(res) {
     if (!res.data.session) { saveScoreLocal(s); return; }
     var userId = res.data.session.user.id;
-    // Insert score, on conflict keep higher score per user
     supabase
       .from("scores")
       .upsert({
@@ -413,10 +586,7 @@ function renderLB() {
   if (!list) return;
   list.innerHTML = '<div class="lb-empty">加载中...</div>';
 
-  if (!supabase) {
-    renderLBLocal();
-    return;
-  }
+  if (typeof supabase === "undefined" || !supabase) { renderLBLocal(); return; }
 
   supabase
     .from("scores")
@@ -424,15 +594,11 @@ function renderLB() {
     .order("score", { ascending: false })
     .limit(50)
     .then(function(res) {
-      if (res.error || !res.data || res.data.length === 0) {
-        renderLBLocal();
-        return;
-      }
+      if (res.error || !res.data || res.data.length === 0) { renderLBLocal(); return; }
       list.innerHTML = "";
       var seen = {};
       for (var i = 0; i < res.data.length; i++) {
         var item = res.data[i];
-        // Deduplicate by username, keep highest score
         if (seen[item.username]) continue;
         seen[item.username] = true;
         var rank = list.children.length + 1;
@@ -451,10 +617,7 @@ function renderLBLocal() {
   var list = document.getElementById("lb-list");
   if (!list) return;
   list.innerHTML = "";
-  if (todayList.length === 0) {
-    list.innerHTML = '<div class="lb-empty">还没有记录</div>';
-    return;
-  }
+  if (todayList.length === 0) { list.innerHTML = '<div class="lb-empty">还没有记录</div>'; return; }
   for (var i = 0; i < todayList.length; i++) {
     var item = todayList[i];
     var rank = i === 0 ? "1ST" : i === 1 ? "2ND" : i === 2 ? "3RD" : (i + 1);
@@ -476,7 +639,6 @@ function escapeHtml(s) {
   d.textContent = s;
   return d.innerHTML;
 }
-
 function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
 
 stars = [];
@@ -490,8 +652,6 @@ score = 0; lives = 3;
 highScoreDisplay.textContent = "HIGH " + highScore;
 updateUI();
 gameLoop();
-
-
 
 
 
