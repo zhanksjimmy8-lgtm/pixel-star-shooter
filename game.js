@@ -639,6 +639,48 @@ function escapeHtml(s) {
   d.textContent = s;
   return d.innerHTML;
 }
+
+// ── Leaderboard ──
+function saveScore(s) {
+  if (s <= 0) return;
+  var today = new Date().toISOString().slice(0,10);
+  var data = JSON.parse(localStorage.getItem("pxsh_lb") || "[]");
+  data.push({ score: s, date: today });
+  data.sort(function(a,b) { return b.score - a.score; });
+  data = data.slice(0, 100);
+  localStorage.setItem("pxsh_lb", JSON.stringify(data));
+}
+
+function renderLB() {
+  var today = new Date().toISOString().slice(0,10);
+  var data = JSON.parse(localStorage.getItem("pxsh_lb") || "[]");
+  var list = data.filter(function(d) { return d.date === today; }).slice(0,10);
+  var el = document.getElementById("lb-list");
+  if (!el) return;
+  el.innerHTML = "";
+  if (list.length === 0) {
+    el.innerHTML = '<div class="lb-empty">今日暂无记录</div>';
+    return;
+  }
+  var medals = ["🥇","🥈","🥉"];
+  for (var i = 0; i < list.length; i++) {
+    var m = i < 3 ? medals[i] + " " : "";
+    el.innerHTML += '<div class="lb-row"><span class="lb-rank">' + m + (i+1) + '</span><span class="lb-score">' + list[i].score + '</span></div>';
+  }
+}
+
+function toggleLB() {
+  var p = document.getElementById("lb-panel");
+  if (!p) return;
+  if (p.style.display === "flex") { p.style.display = "none"; return; }
+  renderLB();
+  p.style.display = "flex";
+}
+
+// Save on game over
+var _origGameOver = gameOver;
+gameOver = function() { saveScore(score); _origGameOver(); };
+
 function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
 
 stars = [];
