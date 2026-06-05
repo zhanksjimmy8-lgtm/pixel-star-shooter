@@ -546,6 +546,7 @@ function gameOver() {
   finalScore.textContent = "SCORE " + score;
   highScoreDisplay.textContent = "HIGH " + highScore;
   gameOverScreen.style.display = "flex"; updateUI();
+  saveScoreSupabase(score);
 }
 
 
@@ -651,6 +652,7 @@ score = 0; lives = 3;
 highScoreDisplay.textContent = "HIGH " + highScore;
 updateUI();
 gameLoop();
+
 
 
 
