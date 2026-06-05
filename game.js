@@ -41,74 +41,21 @@ function updateUI() {
 }
 
 function drawPixelShip(x, y, w, h, color, accent) {
-  var cx = Math.floor(x), cy = Math.floor(y);
-
-  // Engine exhaust (flickering flame)
-  if (Math.random() > 0.2) {
-    ctx.fillStyle = "#ff4400";
-    ctx.fillRect(cx - 11, cy - 2, 2, 4);
-    ctx.fillStyle = "#ff8800";
-    ctx.fillRect(cx - 12, cy - 1, 2, 2);
-    ctx.fillStyle = "#ffcc00";
-    ctx.fillRect(cx - 13, cy, 2, 1);
-  } else {
-    ctx.fillStyle = "#ff2200";
-    ctx.fillRect(cx - 11, cy - 1, 1, 2);
+  ctx.fillStyle = color;
+  ctx.fillRect(x - w / 2 + 2, y - 2, w - 4, h - 6);
+  ctx.fillRect(x - 1, y - h / 2 - 2, 3, 5);
+  ctx.fillStyle = accent;
+  ctx.fillRect(x - 1, y - 3, 3, 3);
+  ctx.fillStyle = "#ff6600";
+  ctx.fillRect(x - 2, y + h / 2 - 3, 2, 3);
+  ctx.fillRect(x + 1, y + h / 2 - 3, 2, 3);
+  if (player.shieldTimer > 0) {
+    ctx.strokeStyle = "rgba(68,204,255,0.4)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(x, y, 14, 0, Math.PI * 2);
+    ctx.stroke();
   }
-
-  // Engine housing
-  ctx.fillStyle = "#114433";
-  ctx.fillRect(cx - 10, cy - 2, 3, 4);
-  ctx.fillStyle = "#226655";
-  ctx.fillRect(cx - 9, cy - 1, 2, 2);
-
-  // Main fuselage - long horizontal body
-  ctx.fillStyle = "#1a5533";
-  ctx.fillRect(cx - 7, cy - 3, 12, 6);
-  ctx.fillStyle = "#228844";
-  ctx.fillRect(cx - 5, cy - 3, 8, 1);
-  ctx.fillRect(cx - 5, cy + 2, 8, 1);
-  ctx.fillStyle = "#33aa55";
-  ctx.fillRect(cx - 3, cy - 2, 6, 4);
-  ctx.fillStyle = "#44cc66";
-  ctx.fillRect(cx - 1, cy - 1, 3, 2);
-
-  // Cockpit glass
-  ctx.fillStyle = "#aaffee";
-  ctx.fillRect(cx + 1, cy - 1, 2, 2);
-  ctx.fillRect(cx + 2, cy, 1, 1);
-
-  // Nose cone (long, sleek, pointing right)
-  ctx.fillStyle = "#55dd77";
-  ctx.fillRect(cx + 5, cy - 1, 1, 2);
-  ctx.fillRect(cx + 6, cy, 1, 1);
-  ctx.fillStyle = "#66ee88";
-  ctx.fillRect(cx + 7, cy, 1, 1);
-
-  // Top wing - swept back
-  ctx.fillStyle = "#1a6644";
-  ctx.fillRect(cx - 5, cy - 5, 3, 2);
-  ctx.fillRect(cx - 3, cy - 6, 2, 1);
-  ctx.fillStyle = "#228855";
-  ctx.fillRect(cx - 2, cy - 4, 1, 1);
-
-  // Bottom wing - swept back  
-  ctx.fillStyle = "#1a6644";
-  ctx.fillRect(cx - 5, cy + 3, 3, 2);
-  ctx.fillRect(cx - 3, cy + 5, 2, 1);
-  ctx.fillStyle = "#228855";
-  ctx.fillRect(cx - 2, cy + 3, 1, 1);
-
-  // Tail stabilizer fins
-  ctx.fillStyle = "#115544";
-  ctx.fillRect(cx - 8, cy - 4, 1, 2);
-  ctx.fillRect(cx - 8, cy + 2, 1, 2);
-  ctx.fillStyle = "#228866";
-  ctx.fillRect(cx - 7, cy - 5, 1, 1);
-  ctx.fillRect(cx - 7, cy + 4, 1, 1);
-
-  // Shield glow if active
-  
 }
 function drawEnemyBasic(x, y) {
   ctx.fillStyle = "#ff4444"; ctx.fillRect(x - 6, y - 5, 12, 10); ctx.fillRect(x - 3, y - 7, 6, 4);
@@ -385,8 +332,8 @@ function draw() {
 
   if (player.invincible <= 0 || player.flashTimer % 6 < 3) {
     drawPixelShip(player.x, player.y, player.w, player.h,
-      "#44ff88",
-      "#88ffaa");
+      player.shieldTimer > 0 ? "#44ccff" : "#44ff88",
+      player.shieldTimer > 0 ? "#88eeff" : "#88ffaa");
     // shield rendered in drawPixelShip
   }
 
@@ -452,6 +399,7 @@ score = 0; lives = 3;
 highScoreDisplay.textContent = "HIGH " + highScore;
 updateUI();
 gameLoop();
+
 
 
 
