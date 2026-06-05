@@ -504,10 +504,7 @@ function draw() {
     drawPixelShip(player.x, player.y, player.w, player.h,
       "#44ff88",
       "#88ffaa");
-    if (player.shieldTimer > 0) {
-      ctx.strokeStyle = "rgba(68,204,255,0.6)"; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.arc(player.x, player.y, 12, 0, Math.PI * 2); ctx.stroke();
-    }
+    // shield rendered in drawPixelShip
   }
 
   for (var pti = 0; pti < particles.length; pti++) {
