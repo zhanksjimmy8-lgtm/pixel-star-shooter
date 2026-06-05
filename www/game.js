@@ -14,7 +14,8 @@ const finalScore = document.getElementById("final-score");
 const highScoreDisplay = document.getElementById("high-score-display");
 
 let audioCtx = null;
-function initAudiofunction resetGame() {
+function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+function playBeep(freq, dur, type, vol) {
   player = createPlayer();
   bullets = []; enemyBullets = []; enemies = []; asteroids = []; powerUps = []; particles = [];
   stars = [];
@@ -376,15 +377,105 @@ function gameOver() {
   gameOverScreen.style.display = "flex"; updateUI();
 }
 
-
-() {
-  var panel = document.getElementById("lb-panel");
-  if (!panel) return;
-  if (panel.style.display === "flex") { panel.style.display = "none"; }
+// ── Supabase Leaderboard ──
+function saveScoreSupabase(s) {
+  if (!supabase) { saveScoreLocal(s); return; }
+  var uname = getCurrentUsername();
+  if (!uname) { saveScoreLocal(s); return; }
+  supabase.auth.getSession().then(function(res) {
+    if (!res.data.session) { saveScoreLocal(s); return; }
+    var userId = res.data.session.user.id;
+    // Insert score, on conflict keep higher score per user
+    supabase
+      .from("scores")
+      .upsert({
+        user_id: userId,
+        username: uname,
+        score: s,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "user_id" })
+      .then(function() {})
+      .catch(function() { saveScoreLocal(s); });
+  }).catch(function() { saveScoreLocal(s); });
 }
 
-// Save score on game over
+function saveScoreLocal(s) {
+  var today = new Date().toISOString().slice(0, 10);
+  var data = JSON.parse(localStorage.getItem("pxsh_lb") || "[]");
+  data.push({ score: s, date: today, time: new Date().toISOString() });
+  data.sort(function(a, b) { return b.score - a.score; });
+  data = data.slice(0, 100);
+  localStorage.setItem("pxsh_lb", JSON.stringify(data));
+}
 
+function renderLB() {
+  var list = document.getElementById("lb-list");
+  if (!list) return;
+  list.innerHTML = '<div class="lb-empty">加载中...</div>';
+
+  if (!supabase) {
+    renderLBLocal();
+    return;
+  }
+
+  supabase
+    .from("scores")
+    .select("username, score")
+    .order("score", { ascending: false })
+    .limit(50)
+    .then(function(res) {
+      if (res.error || !res.data || res.data.length === 0) {
+        renderLBLocal();
+        return;
+      }
+      list.innerHTML = "";
+      var seen = {};
+      for (var i = 0; i < res.data.length; i++) {
+        var item = res.data[i];
+        // Deduplicate by username, keep highest score
+        if (seen[item.username]) continue;
+        seen[item.username] = true;
+        var rank = list.children.length + 1;
+        var medal = rank === 1 ? "\uD83E\uDD47" : rank === 2 ? "\uD83E\uDD48" : rank === 3 ? "\uD83E\uDD49" : "";
+        var rankStr = rank === 1 ? "1ST" : rank === 2 ? "2ND" : rank === 3 ? "3RD" : rank;
+        list.innerHTML += '<div class="lb-row"><span class="lb-rank">' + medal + ' ' + rankStr + '</span><span class="lb-name">' + escapeHtml(item.username) + '</span><span class="lb-score">' + item.score + '</span></div>';
+      }
+    })
+    .catch(function() { renderLBLocal(); });
+}
+
+function renderLBLocal() {
+  var today = new Date().toISOString().slice(0, 10);
+  var data = JSON.parse(localStorage.getItem("pxsh_lb") || "[]");
+  var todayList = data.filter(function(d) { return d.date === today; }).slice(0, 10);
+  var list = document.getElementById("lb-list");
+  if (!list) return;
+  list.innerHTML = "";
+  if (todayList.length === 0) {
+    list.innerHTML = '<div class="lb-empty">还没有记录</div>';
+    return;
+  }
+  for (var i = 0; i < todayList.length; i++) {
+    var item = todayList[i];
+    var rank = i === 0 ? "1ST" : i === 1 ? "2ND" : i === 2 ? "3RD" : (i + 1);
+    var medal = i === 0 ? "\uD83E\uDD47" : i === 1 ? "\uD83E\uDD48" : i === 2 ? "\uD83E\uDD49" : "";
+    list.innerHTML += '<div class="lb-row"><span class="lb-rank">' + medal + ' ' + rank + '</span><span class="lb-score">' + item.score + '</span></div>';
+  }
+}
+
+function toggleLB() {
+  var panel = document.getElementById("lb-panel");
+  if (!panel) return;
+  if (panel.style.display === "flex") { panel.style.display = "none"; return; }
+  renderLB();
+  panel.style.display = "flex";
+}
+
+function escapeHtml(s) {
+  var d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
 
 function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
 
@@ -399,6 +490,8 @@ score = 0; lives = 3;
 highScoreDisplay.textContent = "HIGH " + highScore;
 updateUI();
 gameLoop();
+
+
 
 
 

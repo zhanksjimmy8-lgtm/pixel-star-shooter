@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -35,38 +35,45 @@ canvas { touch-action: none; display: block; width: 100%; height: 100%; image-re
 .mobile-btn { width: 56px; height: 56px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6); font-size: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .mobile-btn.shoot { width: 72px; height: 72px; border-color: rgba(0,229,255,0.5); background: rgba(0,229,255,0.1); color: rgba(0,229,255,0.8); font-size: 28px; }
 @media (max-width: 768px), (pointer: coarse) { #mobile-controls { display: flex; } #game-container { max-height: 100vh; } }
-#lb-btn { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 8px; border: 2px solid rgba(0,229,255,0.4); background: rgba(0,229,255,0.08); color: #00e5ff; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: all 0.15s; }
-#lb-btn:hover { border-color: #00e5ff; background: rgba(0,229,255,0.15); }
-#lb-panel { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5,5,15,0.95); display: none; flex-direction: column; align-items: center; z-index: 20; padding-top: 30px; }
-#lb-panel h2 { color: #00e5ff; font-size: 22px; letter-spacing: 3px; margin-bottom: 16px; text-shadow: 0 0 10px rgba(0,229,255,0.5); }
-#lb-list { width: 260px; max-height: 320px; overflow-y: auto; }
-.lb-row { display: flex; justify-content: space-between; padding: 6px 12px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 15px; color: #ccc; letter-spacing: 2px; }
-.lb-row:first-child { color: #ffcc00; font-size: 17px; }
-.lb-row:nth-child(2) { color: #ccc; }
-.lb-row:nth-child(3) { color: #cc8844; }
-.lb-rank { font-weight: bold; }
-.lb-score { color: #00e5ff; }
-.lb-empty { color: #555; text-align: center; padding: 20px; }
-#lb-close { font-family: inherit; font-size: 14px; letter-spacing: 2px; padding: 6px 24px; border: 1px solid #00e5ff; background: transparent; color: #00e5ff; cursor: pointer; margin-top: 20px; }
-#lb-close:hover { background: #00e5ff; color: #0a0a12; }
+
+/* ── Auth ── */
+#auth-btn { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.05); color: #aaa; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: all 0.15s; }
+#auth-btn:hover { border-color: #00e5ff; color: #00e5ff; }
+#auth-status { color: #00e5ff; font-size: 12px; letter-spacing: 2px; text-shadow: 0 0 6px rgba(0,229,255,0.4); cursor: pointer; pointer-events: all; }
+#auth-status:empty { display: none; }
+#auth-panel { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5,5,15,0.95); display: none; flex-direction: column; align-items: center; z-index: 25; padding-top: 40px; }
+#auth-panel h2 { color: #00e5ff; font-size: 20px; letter-spacing: 3px; margin-bottom: 20px; text-shadow: 0 0 10px rgba(0,229,255,0.5); }
+.auth-tabs { display: flex; gap: 0; margin-bottom: 20px; }
+.auth-tab { font-family: inherit; font-size: 15px; letter-spacing: 2px; padding: 6px 20px; background: transparent; border: none; color: #777; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.auth-tab:hover { color: #00e5ff; }
+.auth-tab.active { color: #00e5ff; border-bottom: 2px solid #00e5ff; }
+.auth-field { font-family: inherit; font-size: 14px; letter-spacing: 2px; width: 240px; padding: 8px 12px; margin-bottom: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #fff; outline: none; }
+.auth-field:focus { border-color: #00e5ff; }
+.auth-field::placeholder { color: #444; }
+.auth-submit { font-family: inherit; font-size: 16px; letter-spacing: 3px; padding: 8px 40px; border: 2px solid #00e5ff; background: transparent; color: #00e5ff; cursor: pointer; margin-top: 6px; text-shadow: 0 0 6px rgba(0,229,255,0.5); transition: all 0.15s; }
+.auth-submit:hover { background: #00e5ff; color: #0a0a12; text-shadow: none; }
+.auth-msg { color: #ff5555; font-size: 12px; letter-spacing: 1px; margin-top: 8px; display: none; }
+.auth-close { font-family: inherit; font-size: 13px; letter-spacing: 2px; padding: 4px 20px; border: 1px solid #555; background: transparent; color: #555; cursor: pointer; margin-top: 16px; }
+.auth-close:hover { border-color: #00e5ff; color: #00e5ff; }
 </style>
 </head>
 <body>
 <div id="game-container">
 <canvas id="game"></canvas>
 <div id="ui-overlay">
-<div><div class="ui-stat" id="score-ui">SCORE 0</div><div class="ui-stat combo" id="combo-ui" style="display:none"></div></div>
+<div><div class="ui-stat" id="score-ui">SCORE 0</div><div class="ui-stat combo" id="combo-ui" style="display:none"></div><div class="ui-stat" id="auth-status" onclick="toggleAuth()"></div></div>
 <div class="ui-stat lives" id="lives-ui">HEARTS 3</div>
 </div>
 <div id="start-screen">
-<button id="lb-btn" onclick="toggleLB()" title="今日排行榜">&#x1F3C6;</button>
+
+<button id="auth-btn" onclick="toggleAuth()" title="登录">&#x1F464;</button>
 <div class="screen-title">星际战机</div>
 <div class="screen-subtitle">PIXEL SPACE SHOOTER</div>
 <button class="screen-btn" id="start-btn" autofocus>开 始</button>
 <div class="controls-hint"><span>方向键</span> 移动 · <span>空格</span> 射击 · <span>P</span> 暂停</div>
 </div>
 <div id="game-over-screen">
-<div class="screen-title">坠 毁</div>
+<div class="screen-title">摧 毁</div>
 <div id="final-score">得分 0</div>
 <div id="high-score-display">最高 0</div>
 <button class="screen-btn" id="restart-btn">再 来</button>
@@ -74,12 +81,28 @@ canvas { touch-action: none; display: block; width: 100%; height: 100%; image-re
 <div id="mobile-controls">
 <button class="mobile-btn" id="btn-up">▲</button>
 <button class="mobile-btn" id="btn-left">◀</button>
-<button class="mobile-btn shoot" id="btn-shoot">◎</button>
+<button class="mobile-btn shoot" id="btn-shoot">●</button>
 <button class="mobile-btn" id="btn-right">▶</button>
 <button class="mobile-btn" id="btn-down">▼</button>
 </div>
-<div id="lb-panel"><h2>&#x1F3C6; 今日排行榜</h2><div id="lb-list"></div><button id="lb-close" onclick="toggleLB()">关闭</button></div>
+<button id="lb-close" onclick="toggleLB()">关闭</button></div>
+<div id="auth-panel">
+<h2>&#x1F464; 账户</h2>
+<div class="auth-tabs">
+<button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">登录</button>
+<button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">注册</button>
 </div>
+<input class="auth-field" id="auth-email" type="email" placeholder="邮箱" autocomplete="email">
+<input class="auth-field" id="auth-pw" type="password" placeholder="密码" autocomplete="current-password">
+<div id="auth-username-row" style="display:none"><input class="auth-field" id="auth-username" type="text" placeholder="玩家名" autocomplete="username"></div>
+<button class="auth-submit" id="auth-submit" onclick="doLogin()">登录</button>
+<div class="auth-msg" id="auth-msg"></div>
+<button class="auth-close" onclick="toggleAuth()">关闭</button>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="supabase-config.js"></script>
+<script src="auth.js"></script>
 <script src="game.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js");}</script>
 </body>
