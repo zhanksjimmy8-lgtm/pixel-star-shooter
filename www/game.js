@@ -1,3 +1,5 @@
+
+window.onerror = function(msg, url, line) { alert("JS Error: " + msg + " at line " + line); };
 ﻿const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const W = 320, H = 200;
